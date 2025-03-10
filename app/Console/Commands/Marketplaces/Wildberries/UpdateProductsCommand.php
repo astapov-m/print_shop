@@ -9,7 +9,6 @@ use Google\Service\Sheets;
 use Google\Service\Sheets\ValueRange;
 use Google_Service_Sheets_BatchUpdateSpreadsheetRequest;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
 
 class UpdateProductsCommand extends Command
 {

@@ -79,7 +79,6 @@ class OrdersRepository
     private function getOrdersId(): array
     {
         $ordersId = [];
-        //print_r($this->order_response);
         foreach ($this->order_response['orders'] as $order) {
             $ordersId[] = $order['id'];
         }
@@ -95,4 +94,21 @@ class OrdersRepository
         $res = $this->client->post('orders/stickers?type=png&width=40&height=30', ['orders'=>$orders_id]);
         return $res['stickers'];
     }
+
+    public function addOrderKiz($orders_id, $kizCode)
+    {
+        $this->client->put("orders/$orders_id/meta/sgtin",[
+            'sgtins' => [
+                preg_replace('/[\x00-\x1F\x7F]/u', '', $kizCode)
+            ]
+        ]);
+    }
+
+    public static function addOrderKizStatic($orders_id, $kizCode): void
+    {
+        $repository = new self(app(WbV3::class));
+        $repository->addOrderKiz($orders_id, $kizCode);
+    }
+
+
 }

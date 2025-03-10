@@ -24,16 +24,10 @@ class WbV3
     {
         return $this->query()->post(env('WILDBERRIES_API_V3_URL').$path,$data)->json();
     }
-//
-//    public function put(string $path,array $data = []) : ?array
-//    {
-//        $res = $this->query()->put(env('WILDBERRIES_API_V3_URL').$path,$data);
-//        return $res->json();
-//    }
-//
-//    public function patch(string $path,array $data = []) : ?array
-//    {
-//        $res = $this->query()->patch(env('WILDBERRIES_API_V3_URL').$path,$data);
-//        return $res->json();
-//    }
+    public function put(string $path,array $data = []) : ?array
+    {
+        $res = $this->query()->put(env('WILDBERRIES_API_V3_URL').$path,$data);
+        return $res->json();
+    }
+
 }

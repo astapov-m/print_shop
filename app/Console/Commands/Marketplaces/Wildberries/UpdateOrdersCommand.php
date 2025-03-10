@@ -7,7 +7,6 @@ use App\StoreProject\Components\GoogleSheet\Enums\Wildberries\ListEnum;
 use App\StoreProject\Components\GoogleSheet\Enums\Wildberries\ListIdEnum;
 use App\StoreProject\Components\GoogleSheet\Enums\Wildberries\OrderListEnum;
 use App\StoreProject\Components\GoogleSheet\Enums\Wildberries\ProductListEnum;
-use App\StoreProject\Components\GoogleSheet\Enums\Wildberries\SupplyListEnum;
 use App\StoreProject\Components\GoogleSheet\Sheet\GoogleSheetsService;
 use App\StoreProject\Components\Kiz\Generators\Kiz\Generators\TecItBarcodeGenerator;
 use App\StoreProject\Components\Kiz\KizProcessor;
@@ -67,23 +66,34 @@ class UpdateOrdersCommand extends Command
 
         $all_confirm_orders_id = $all_confirm_orders->pluck('id')->toArray();
 
+        $old_orders_confirm = [];
+        foreach ($old_orders as $order) {
+            if (in_array($order[OrderListEnum::order_id->value], $all_confirm_orders_id)) {
+                if ($order[OrderListEnum::supply->value] != $all_confirm_orders->firstWhere('id', $order[OrderListEnum::order_id->value])['supplyId']){
+                    $order[OrderListEnum::supply->value] = $all_confirm_orders->firstWhere('id', $order[OrderListEnum::order_id->value])['supplyId'];
+                }
+                $old_orders_confirm[] = $order;
+            }
+        }
 
         $this->updateSupplyList($all_confirm_orders->pluck('supplyId')->unique()->toArray(), $spreadsheetId);
 
 
-        $orders = collect($orders->getOrderResponse()['orders'])->where('supplierStatus','confirm')->whereNotIn('id',$ids_old_orders)->take(50)
-            ->values() // Сбрасываем ключи
-            ->reverse(); // Переворачиваем коллекцию
+        $orders = collect($orders->getOrderResponse()['orders'])->where('supplierStatus','confirm')->whereNotIn('id',$ids_old_orders)
+            ->take(30)
+            ->values()
+            ->reverse();
 
         $newOrderIds = $orders->pluck('id')->toArray();
-        if (count($newOrderIds) == 0) {
-            return;
-        }
-        $stickers = collect(OrdersRepository::getOrdersStickersStatic($newOrderIds));
 
-        foreach ($stickers as $sticker) {
-            File::put(storage_path('app/public/wb/barcodes/'."{$sticker['orderId']}.png"), base64_decode($sticker['file']));
+        if (count($newOrderIds) != 0) {
+            $stickers = collect(OrdersRepository::getOrdersStickersStatic($newOrderIds));
+
+            foreach ($stickers as $sticker) {
+                File::put(storage_path('app/public/wb/barcodes/'."{$sticker['orderId']}.png"), base64_decode($sticker['file']));
+            }
         }
+
 
 
         $range_barcodes = ListEnum::product_list->value;
@@ -107,9 +117,9 @@ class UpdateOrdersCommand extends Command
 
             $name = $product[ProductListEnum::name->value];
             $size = $product[ProductListEnum::sizeA->value];
+            $color = $product[ProductListEnum::color->value];
 
-            $kiz = $kizProcessor->getKiz($name, $size, $order['id'], $spreadsheetId);
-
+            $kiz = $kizProcessor->getKiz($name, $size, $order['id'], $spreadsheetId, $color);
 
             $data[] = [
                 $order['id'],
@@ -125,7 +135,7 @@ class UpdateOrdersCommand extends Command
             ];
         }
 
-        foreach ($old_orders as $key => $item){
+        foreach ($old_orders_confirm as $key => $item){
             $barcode = $item[1];
 
             $product = array_filter($products_list, function ($row) use ($barcode) {
@@ -134,37 +144,28 @@ class UpdateOrdersCommand extends Command
 
             $product = array_values($product)[0];
 
-            $old_orders[$key][OrderListEnum::photo->value] = '=IMAGE("'.$product[6].'"; 4; 200; 200)';
+            $old_orders_confirm[$key][OrderListEnum::photo->value] = '=IMAGE("'.$product[6].'"; 4; 200; 200)';
 
-            if ($old_orders[$key][OrderListEnum::kizA->value] == '-' && in_array($item[0], $all_confirm_orders_id)){
-                $kiz = $this->getKiz($product[ProductListEnum::name->value], $product[ProductListEnum::sizeA->value], $item[0], $service, $spreadsheetId);
+            if ($old_orders_confirm[$key][OrderListEnum::kizA->value] == '-' && in_array($item[0], $all_confirm_orders_id)){
+                $kiz = $kizProcessor->getKiz($product[ProductListEnum::name->value], $product[ProductListEnum::sizeA->value], $item[0], $spreadsheetId, $product[ProductListEnum::color->value]);
                 if (!is_null($kiz)){
-                    $old_orders[$key][OrderListEnum::kizA->value] = $kiz[0];
-                    $old_orders[$key][OrderListEnum::kizB->value] = $kiz[1];
+                    $old_orders_confirm[$key][OrderListEnum::kizA->value] = $kiz[0];
+                    $old_orders_confirm[$key][OrderListEnum::kizB->value] = $kiz[1];
                 }
             }
         }
 
-        $updatedData = array_merge($data, $old_orders);
+        $updatedData = array_merge($data, $old_orders_confirm);
         $this->spreadsheetService->updateValues($spreadsheetId, "$range_orders!A2", $updatedData);
     }
 
-    private function updateSupplyList(array $suppliers, string $spreadsheetId)
+    private function updateSupplyList(array $suppliers, string $spreadsheetId): void
     {
         $range_supply = ListEnum::supply_list->value;
-        $existingDataSup = $this->spreadsheetService->getValues($spreadsheetId, $range_supply, false);
-        $ids_old_supply = array_map(function($row) {
-            return $row[SupplyListEnum::supply_id->value];
-        }, $existingDataSup);
-
-        $data_sup = [];
+        $updatedDataSupply = [];
         foreach ($suppliers as $supply){
-            if (!in_array($supply, $ids_old_supply)){
-                $data_sup[] = [$supply, env('PRINT_LINK').'supply-print/'.$supply];
-            }
+            $updatedDataSupply[] = [$supply, env('PRINT_LINK').'supply-print/'.$supply];
         }
-
-        $updatedDataSupply = array_merge($data_sup, $existingDataSup); // Соединяем массивы
 
         $this->spreadsheetService->updateValues($spreadsheetId,"$range_supply!A2",$updatedDataSupply);
     }

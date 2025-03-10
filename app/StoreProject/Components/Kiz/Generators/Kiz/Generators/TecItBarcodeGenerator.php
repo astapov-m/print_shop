@@ -11,7 +11,14 @@ class TecItBarcodeGenerator implements KizGeneratorInterface
     {
         try {
             $urlencode = urlencode($data);
-            return Http::get("https://barcode.tec-it.com/barcode.ashx?data={$urlencode}&code=DataMatrix&dmsize=Default")->body();
+            $request = Http::get("https://barcode.tec-it.com/barcode.ashx?data={$urlencode}&code=DataMatrix&dmsize=Default");
+            if ($request->status() == 200) {
+                return $request->body();
+            }else{
+                sleep(5);
+                return null;
+            }
+
         } catch (\Throwable $exception) {
             return null;
         }
