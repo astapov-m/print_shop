@@ -153,6 +153,14 @@ class UpdateOrdersCommand extends Command
                     $old_orders_confirm[$key][OrderListEnum::kizB->value] = $kiz[1];
                 }
             }
+            if ($old_orders_confirm[$key][OrderListEnum::kizA->value] != '-'){
+                $errorHash = hash_file('sha256', storage_path('app/public/error_kiz.png'));
+                $thisHash = hash_file('sha256', storage_path("app/public/wb/kiz/$item[0].png"));
+                if ($errorHash == $thisHash){
+                    print_r($item[0]);
+                    $kizProcessor->getNewKizImage($product[ProductListEnum::name->value], $product[ProductListEnum::sizeA->value], $item[0], $spreadsheetId, $product[ProductListEnum::color->value]);
+                }
+            }
         }
 
         $updatedData = array_merge($data, $old_orders_confirm);

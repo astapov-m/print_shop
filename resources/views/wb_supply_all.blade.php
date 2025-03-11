@@ -41,14 +41,14 @@
     @if(!is_null($filteredRows[8]) && $filteredRows[8] != '-')
         <div>
             <img style="position: relative; margin-top: -8mm; margin-left: -7.5mm;" src="storage/wb/kiz/{{$filteredRows[7]}}.png" width="138mm" height="138mm" alt="Описание изображения">
-            <p style="position: relative; margin-top: -20mm; margin-left: 40mm; font-weight: bold; font-size: 3.2mm;">{{$filteredRows[10]}} {{$filteredRows[5]}}, с рисунком, размер {{$filteredRows[3]}}</p>
+            <p style="position: relative; margin-top: -20mm; margin-left: 40mm; font-weight: bold; font-size: 3.2mm;">{{$filteredRows[10]}} {{substr_replace($filteredRows[5], 'ая', -1)}}, с рисунком, размер {{$filteredRows[3]}}</p>
             <img style="position: relative; margin-top: -38mm; margin-left: 57.5mm;" src="storage/images.png" width="100mm" height="45mm" alt="Описание изображения">
             <p style="position: relative; margin-top: -4.3mm; font-weight: bold; font-size: 3.1mm; margin-left: -8mm">(01){{$filteredRows[8]}}</p>
             <p style="position: relative; font-weight: bold; font-size: 3.1mm; margin-left: -8mm; margin-top: -1.4mm; ">(21){{$filteredRows[9]}}</p>
         </div>
         <div>
             <img style="position: relative; margin-top: -8mm; margin-left: -7.5mm;" src="storage/wb/kiz/{{$filteredRows[7]}}.png" width="138mm" height="138mm" alt="Описание изображения">
-            <p style="position: relative; margin-top: -20mm; margin-left: 40mm; font-weight: bold; font-size: 3.2mm;">{{$filteredRows[10]}} {{$filteredRows[5]}}, с рисунком, размер {{$filteredRows[3]}}</p>
+            <p style="position: relative; margin-top: -20mm; margin-left: 40mm; font-weight: bold; font-size: 3.2mm;">{{$filteredRows[10]}} {{substr_replace($filteredRows[5], 'ая', -1)}}, с рисунком, размер {{$filteredRows[3]}}</p>
             <img style="position: relative; margin-top: -38mm; margin-left: 57.5mm;" src="storage/images.png" width="100mm" height="45mm" alt="Описание изображения">
             <p style="position: relative; margin-top: -4.3mm; font-weight: bold; font-size: 3.1mm; margin-left: -8mm">(01){{$filteredRows[8]}}</p>
             <p style="position: relative; font-weight: bold; font-size: 3.1mm; margin-left: -8mm; margin-top: -1.4mm; ">(21){{$filteredRows[9]}}</p>

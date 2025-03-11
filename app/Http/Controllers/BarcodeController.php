@@ -50,7 +50,7 @@ class BarcodeController extends Controller
 
         $name = $filteredRows[2];
 
-        $names = ['Худи', 'Зипка']; // Добавьте нужные варианты
+        $names = ['Худи', 'Зипка','Футболка', 'Лонгслив'];
         $pattern = '/\b(' . implode('|', $names) . ')\b/ui';
 
         preg_match($pattern, $name, $matches);
@@ -142,7 +142,7 @@ class BarcodeController extends Controller
 
                 $name = $filteredRows[2];
 
-                $names = ['Худи', 'Зипка']; // Добавьте нужные варианты
+                $names = ['Худи', 'Зипка','Футболка', 'Лонгслив']; // Добавьте нужные варианты
                 $pattern = '/\b(' . implode('|', $names) . ')\b/ui';
 
                 preg_match($pattern, $name, $matches);

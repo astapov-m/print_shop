@@ -76,10 +76,73 @@ class KizProcessor
         return null;
     }
 
+    public function getNewKizImage(string $name, string $size, string $orderId, string $spreadsheetId, string $color, int $error = 0): ?array
+    {
+        $error++;
+        $size = strtok($size, "/");
+
+        $lizList = null;
+        $rangeKiz = '';
+        foreach (self::kiz_types_map as $key => $kiz_type) {
+            $pattern = '/\b(' . implode('|', $kiz_type) . ')\b/ui';
+
+            preg_match($pattern, $name, $matches);
+            $lizList = $matches[1] ?? null;
+
+            if ($lizList){
+                if ($key == 'B') {
+                    $rangeKiz = str_replace(" ", "", $lizList . $color . $size);
+                }else{
+                    $rangeKiz = str_replace(" ", "", $lizList . $size);
+                }
+                break;
+            }
+        }
+
+
+        if ($lizList) {
+
+            $existingDataKIZ = $this->spreadsheetService->getValues($spreadsheetId, $rangeKiz);
+
+            foreach ($existingDataKIZ as $key => $subArray) {
+                if ($this->shouldSkipRowById($subArray, $orderId)) {
+                    continue;
+                }
+
+                $filteredArray = array_filter($subArray, function ($value) {
+                    return $value != '';
+                });
+                array_pop($filteredArray);
+
+                $codeString = implode(";", $filteredArray);
+
+                $barcodeData = $this->kizGenerator->generateKiz($codeString);
+
+                if (!$barcodeData) {
+                    return ($error < 4) ? $this->getKiz($name, $size, $orderId, $spreadsheetId, $color, $error) : null;
+                }
+
+                File::put(storage_path("app/public/wb/kiz/$orderId.png"), $barcodeData);
+                return null;
+            }
+        }
+        return null;
+    }
+
     private function shouldSkipRow(array $subArray): bool
     {
         foreach ($subArray as $value) {
             if (strpos($value, "Задание") !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function shouldSkipRowById(array $subArray, $orderId): bool
+    {
+        foreach ($subArray as $value) {
+            if ($value == "Задание-$orderId") {
                 return true;
             }
         }
