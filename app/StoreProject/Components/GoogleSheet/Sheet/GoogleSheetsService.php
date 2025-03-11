@@ -4,8 +4,10 @@ namespace App\StoreProject\Components\GoogleSheet\Sheet;
 
 use App\StoreProject\Components\GoogleSheet\Interfaces\SpreadsheetServiceInterface;
 use Google\Service\Sheets;
+use Google\Service\Sheets\ClearValuesRequest;
 use Google\Service\Sheets\ValueRange;
 use Google_Service_Sheets_BatchUpdateSpreadsheetRequest;
+use Google_Service_Sheets_ClearValuesRequest;
 
 class GoogleSheetsService implements SpreadsheetServiceInterface
 {
@@ -26,6 +28,15 @@ class GoogleSheetsService implements SpreadsheetServiceInterface
         $body = new ValueRange(['values' => $values]);
         $params = ['valueInputOption' => 'USER_ENTERED'];
         $this->service->spreadsheets_values->update($spreadsheetId, $range, $body, $params);
+    }
+
+    public function clearSheetExceptFirstRow(string $spreadsheetId, string $sheetName): void
+    {
+        $range = "{$sheetName}!A2:Z";
+
+        $body = new Google_Service_Sheets_ClearValuesRequest();
+
+        $this->service->spreadsheets_values->clear($spreadsheetId, $range, $body);
     }
 
     public function addValues(string $spreadsheetId, string $range, array $values): void

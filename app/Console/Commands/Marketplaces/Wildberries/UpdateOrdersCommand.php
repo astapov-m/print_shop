@@ -156,6 +156,9 @@ class UpdateOrdersCommand extends Command
         }
 
         $updatedData = array_merge($data, $old_orders_confirm);
+
+        $this->spreadsheetService->clearSheetExceptFirstRow($spreadsheetId, $range_orders);
+
         $this->spreadsheetService->updateValues($spreadsheetId, "$range_orders!A2", $updatedData);
     }
 
@@ -166,6 +169,8 @@ class UpdateOrdersCommand extends Command
         foreach ($suppliers as $supply){
             $updatedDataSupply[] = [$supply, env('PRINT_LINK').'supply-print/'.$supply];
         }
+
+        $this->spreadsheetService->clearSheetExceptFirstRow($spreadsheetId, $range_supply);
 
         $this->spreadsheetService->updateValues($spreadsheetId,"$range_supply!A2",$updatedDataSupply);
     }
