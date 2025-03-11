@@ -56,9 +56,14 @@ class KizProcessor
                 if (!$barcodeData) {
                     return ($error < 4) ? $this->getKiz($name, $size, $orderId, $spreadsheetId, $color, $error) : null;
                 }
+                $errorHash = hash_file('sha256', storage_path('app/public/error_kiz.png'));
+                $newHash = hash('sha256', $barcodeData);
+                if ($errorHash == $newHash) {
+                    sleep(5);
+                    return ($error < 4) ? $this->getKiz($name, $size, $orderId, $spreadsheetId, $color, $error) : null;
+                }
 
                 File::put(storage_path("app/public/wb/kiz/$orderId.png"), $barcodeData);
-
                 while (count($existingDataKIZ[$key]) < 4) {
                     $existingDataKIZ[$key][] = "";
                 }
