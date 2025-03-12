@@ -120,6 +120,8 @@ class UpdateOrdersCommand extends Command
             $color = $product[ProductListEnum::color->value];
 
             $kiz = $kizProcessor->getKiz($name, $size, $order['id'], $spreadsheetId, $color);
+            print_r($order['id'].' ');
+            print_r($kiz);
 
             $data[] = [
                 $order['id'],
