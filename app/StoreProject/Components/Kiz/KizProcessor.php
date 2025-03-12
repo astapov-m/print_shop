@@ -64,6 +64,7 @@ class KizProcessor
                 }
 
                 File::put(storage_path("app/public/wb/kiz/$orderId.png"), $barcodeData);
+                var_dump($kizA);
                 while (count($existingDataKIZ[$key]) < 4) {
                     $existingDataKIZ[$key][] = "";
                 }

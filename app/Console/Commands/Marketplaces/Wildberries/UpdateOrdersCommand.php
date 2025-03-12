@@ -136,6 +136,7 @@ class UpdateOrdersCommand extends Command
                 is_null($kiz) ? '-' : $kiz[1],
             ];
         }
+        exit();
 
         foreach ($old_orders_confirm as $key => $item){
             $barcode = $item[1];
