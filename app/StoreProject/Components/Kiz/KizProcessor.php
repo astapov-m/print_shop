@@ -54,17 +54,17 @@ class KizProcessor
                 $barcodeData = $this->kizGenerator->generateKiz($codeString);
 
                 if (!$barcodeData) {
-                    return ($error < 4) ? $this->getKiz($name, $size, $orderId, $spreadsheetId, $color, $error) : null;
+                    return ($error < 3) ? $this->getKiz($name, $size, $orderId, $spreadsheetId, $color, $error) : null;
                 }
                 $errorHash = hash_file('sha256', storage_path('app/public/error_kiz.png'));
                 $newHash = hash('sha256', $barcodeData);
                 if ($errorHash == $newHash) {
-                    sleep(5);
-                    return ($error < 4) ? $this->getKiz($name, $size, $orderId, $spreadsheetId, $color, $error) : null;
+                    sleep(2);
+                    return ($error < 3) ? $this->getKiz($name, $size, $orderId, $spreadsheetId, $color, $error) : null;
                 }
 
                 File::put(storage_path("app/public/wb/kiz/$orderId.png"), $barcodeData);
-                var_dump($kizA);
+
                 while (count($existingDataKIZ[$key]) < 4) {
                     $existingDataKIZ[$key][] = "";
                 }
@@ -138,7 +138,7 @@ class KizProcessor
     private function shouldSkipRow(array $subArray): bool
     {
         foreach ($subArray as $value) {
-            if (strpos($value, "Задание") !== false) {
+            if (strpos($value, "Задание") !== false && !empty($subArray[0])) {
                 return true;
             }
         }

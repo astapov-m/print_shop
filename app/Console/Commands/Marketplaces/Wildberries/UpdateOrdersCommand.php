@@ -80,7 +80,7 @@ class UpdateOrdersCommand extends Command
 
 
         $orders = collect($orders->getOrderResponse()['orders'])->where('supplierStatus','confirm')->whereNotIn('id',$ids_old_orders)
-            ->take(30)
+            ->take(20)
             ->values()
             ->reverse();
 
@@ -120,8 +120,7 @@ class UpdateOrdersCommand extends Command
             $color = $product[ProductListEnum::color->value];
 
             $kiz = $kizProcessor->getKiz($name, $size, $order['id'], $spreadsheetId, $color);
-            print_r($order['id'].' ');
-            print_r($kiz);
+            sleep(1);
 
             $data[] = [
                 $order['id'],
@@ -136,7 +135,6 @@ class UpdateOrdersCommand extends Command
                 is_null($kiz) ? '-' : $kiz[1],
             ];
         }
-        exit();
 
         foreach ($old_orders_confirm as $key => $item){
             $barcode = $item[1];
@@ -160,7 +158,6 @@ class UpdateOrdersCommand extends Command
                 $errorHash = hash_file('sha256', storage_path('app/public/error_kiz.png'));
                 $thisHash = hash_file('sha256', storage_path("app/public/wb/kiz/$item[0].png"));
                 if ($errorHash == $thisHash){
-                    print_r($item[0]);
                     $kizProcessor->getNewKizImage($product[ProductListEnum::name->value], $product[ProductListEnum::sizeA->value], $item[0], $spreadsheetId, $product[ProductListEnum::color->value]);
                 }
             }
