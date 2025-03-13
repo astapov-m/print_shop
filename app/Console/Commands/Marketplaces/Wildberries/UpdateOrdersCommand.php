@@ -164,6 +164,10 @@ class UpdateOrdersCommand extends Command
         }
 
         $updatedData = array_merge($data, $old_orders_confirm);
+        usort($updatedData, function($a, $b) {
+            return strcmp($a[OrderListEnum::article->value], $b[OrderListEnum::article->value]); // Сравнение строк по 4-му ключу (индекс 3)
+        });
+
 
         $this->spreadsheetService->clearSheetExceptFirstRow($spreadsheetId, $range_orders);
 
