@@ -164,8 +164,13 @@ class UpdateOrdersCommand extends Command
         }
 
         $updatedData = array_merge($data, $old_orders_confirm);
-        usort($updatedData, function($a, $b) {
-            return strcmp($a[OrderListEnum::name->value], $b[OrderListEnum::name->value]); // Сравнение строк по 4-му ключу (индекс 3)
+        usort($updatedData, function ($a, $b) {
+            $result = strcmp($a[OrderListEnum::article->value], $b[OrderListEnum::article->value]);
+            if ($result === 0) {
+                return strcmp($a[OrderListEnum::name->value], $b[OrderListEnum::name->value]);
+            }
+
+            return $result;
         });
 
 
