@@ -128,7 +128,7 @@ class UpdateOrdersCommand extends Command
                 $label,
                 $order['article'],
                 $name.' '.$size,
-                '=IMAGE("'.$product[ProductListEnum::photo_link->value].'"; 4; 200; 200)',
+                '=IMAGE("'.$product[ProductListEnum::photo_link->value].'"; 4; 130; 130)',
                 $order['supplyId'],
                 env('PRINT_LINK').'order-print/'.$order['id'],
                 is_null($kiz) ? '-' : $kiz[0],
@@ -145,7 +145,7 @@ class UpdateOrdersCommand extends Command
 
             $product = array_values($product)[0];
 
-            $old_orders_confirm[$key][OrderListEnum::photo->value] = '=IMAGE("'.$product[6].'"; 4; 200; 200)';
+            $old_orders_confirm[$key][OrderListEnum::photo->value] = '=IMAGE("'.$product[6].'"; 4; 130; 130)';
 
             if ($old_orders_confirm[$key][OrderListEnum::kizA->value] == '-' && in_array($item[0], $all_confirm_orders_id)){
                 $kiz = $kizProcessor->getKiz($product[ProductListEnum::name->value], $product[ProductListEnum::sizeA->value], $item[0], $spreadsheetId, $product[ProductListEnum::color->value]);
@@ -165,7 +165,7 @@ class UpdateOrdersCommand extends Command
 
         $updatedData = array_merge($data, $old_orders_confirm);
         usort($updatedData, function($a, $b) {
-            return strcmp($a[OrderListEnum::article->value], $b[OrderListEnum::article->value]); // Сравнение строк по 4-му ключу (индекс 3)
+            return strcmp($a[OrderListEnum::name->value], $b[OrderListEnum::name->value]); // Сравнение строк по 4-му ключу (индекс 3)
         });
 
 

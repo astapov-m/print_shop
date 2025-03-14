@@ -44,7 +44,7 @@ class KizProcessor
             $existingDataKIZ = $this->spreadsheetService->getValues($spreadsheetId, $rangeKiz);
 
             foreach ($existingDataKIZ as $key => $subArray) {
-                if ($this->shouldSkipRow($subArray)) {
+                if ($this->shouldSkipRow($subArray,$orderId)) {
                     continue;
                 }
 
@@ -125,7 +125,7 @@ class KizProcessor
                 $barcodeData = $this->kizGenerator->generateKiz($codeString);
 
                 if (!$barcodeData) {
-                    return ($error < 4) ? $this->getKiz($name, $size, $orderId, $spreadsheetId, $color, $error) : null;
+                    return ($error < 3) ? $this->getNewKizImage($name, $size, $orderId, $spreadsheetId, $color, $error) : null;
                 }
 
                 File::put(storage_path("app/public/wb/kiz/$orderId.png"), $barcodeData);
@@ -135,10 +135,10 @@ class KizProcessor
         return null;
     }
 
-    private function shouldSkipRow(array $subArray): bool
+    private function shouldSkipRow(array $subArray, $order_id): bool
     {
         foreach ($subArray as $value) {
-            if (strpos($value, "Задание") !== false && !empty($subArray[0])) {
+            if ((strpos($value, "Задание") !== false && !empty($subArray[0])) || $value == "Задание-$order_id") {
                 return true;
             }
         }

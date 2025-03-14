@@ -63,7 +63,7 @@ class GoogleSheetsService implements SpreadsheetServiceInterface
                         'endIndex' => 2000 // Следующая строка (если одна — startIndex + 1)
                     ],
                     'properties' => [
-                        'pixelSize' => 200 // Высота в пикселях
+                        'pixelSize' => 130 // Высота в пикселях
                     ],
                     'fields' => 'pixelSize'
                 ]
