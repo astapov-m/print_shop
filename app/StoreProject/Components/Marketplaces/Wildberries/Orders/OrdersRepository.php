@@ -70,9 +70,9 @@ class OrdersRepository
     public function addStatuses(): void
     {
         $statuses = StatusesRepository::getStatusesStatic($this->getOrdersId())->status_repository;
+        $statuses = collect($statuses['orders']);
         foreach ($this->order_response['orders'] as $key => $order){
-            $this->order_response['orders'][$key]['supplierStatus'] = $statuses['orders'][$key]['supplierStatus'];
-            $this->order_response['orders'][$key]['wbStatus'] = $statuses['orders'][$key]['supplierStatus'];
+            $this->order_response['orders'][$key]['supplierStatus'] = $statuses->firstWhere('id', $order['id'])['supplierStatus'] ?? null;
         }
     }
 
