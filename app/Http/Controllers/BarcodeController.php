@@ -157,6 +157,7 @@ class BarcodeController extends Controller
             }
 
         }
+        $supply_data = array_reverse($supply_data);
 
         $pdf = Pdf::loadView('wb_supply_all',compact('supply_data'),[],'utf-8')->setPaper([0, 0, 290,200]);
         return $pdf->stream();
