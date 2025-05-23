@@ -3,13 +3,14 @@
 namespace App\StoreProject\Components\Marketplaces\Wildberries\Products;
 
 use App\StoreProject\Clients\WbV2;
+use Carbon\Carbon;
 
 class ProductRepository
 {
     //
     public static function getProducts(){
         $products = [];
-        $cursor = ["limit" => 100]; // Начинаем с лимитом 100
+        $cursor = ["limit" => 50]; // Начинаем с лимитом 100
         $hasMore = true;
 
         while ($hasMore) {
@@ -42,6 +43,7 @@ class ProductRepository
 
             // 🔹 Проверяем, есть ли ещё товары
             $hasMore = ($response['cursor']['total'] >= $cursor['limit']);
+            break;
         }
 
         return $products;

@@ -3,6 +3,7 @@
 namespace App\Console\Commands\Marketplaces\Wildberries;
 
 use App\StoreProject\Clients\GoogleSheetFactory;
+use App\StoreProject\Clients\WbV3;
 use App\StoreProject\Components\GoogleSheet\Enums\Wildberries\ListEnum;
 use App\StoreProject\Components\GoogleSheet\Enums\Wildberries\ListIdEnum;
 use App\StoreProject\Components\GoogleSheet\Enums\Wildberries\OrderListEnum;
@@ -58,13 +59,15 @@ class UpdateOrdersCommand extends Command
             return $row[OrderListEnum::order_id->value];
         }, $old_orders);
 
-        $orders = OrdersRepository::getOrdersStatic();
+        $repo = new OrdersRepository(app(WbV3::class));
+        $orders = $repo->getAllOrders();
         $orders->addStatuses();
         $all_confirm_orders = collect($orders->getOrderResponse()['orders'])->where('supplierStatus','confirm')
             ->values()
             ->reverse();
 
         $all_confirm_orders_id = $all_confirm_orders->pluck('id')->toArray();
+
 
         $old_orders_confirm = [];
         foreach ($old_orders as $order) {

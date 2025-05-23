@@ -39,14 +39,12 @@ class OrdersRepository
         return $this;
     }
 
-    public function getOrders(int $limit = 1000 , int $next = 0 , int $dateFrom = null , int $dateTo = null) : OrdersRepository
+    public function getOrders(int $limit = 1000 , int $next = 0 , int $dateFrom = null , int $dateTo = null)
     {
         if (is_null($dateFrom)){
-            $dateFrom = Carbon::now()->subDays(7)->timestamp;
+            $dateFrom = Carbon::now()->subDays(6)->timestamp;
         }
-        $this->order_response = $this->client->get('orders',self::generateData($limit,$next,$dateFrom,$dateTo));
-
-        return $this;
+        return $this->client->get('orders',self::generateData($limit,$next,$dateFrom,$dateTo));
     }
 
     private static function generateData(int $limit = 1000 , int $next = 0 , int $dateFrom = null , int $dateTo = null): array
@@ -69,12 +67,42 @@ class OrdersRepository
 
     public function addStatuses(): void
     {
-        $statuses = StatusesRepository::getStatusesStatic($this->getOrdersId())->status_repository;
-        $statuses = collect($statuses['orders']);
-        foreach ($this->order_response['orders'] as $key => $order){
-            $this->order_response['orders'][$key]['supplierStatus'] = $statuses->firstWhere('id', $order['id'])['supplierStatus'] ?? null;
+        $allStatuses = collect();
+        $orderIds = $this->getOrdersId();
+        $chunkedIds = array_chunk($orderIds, 1000);
+
+        foreach ($chunkedIds as $idsChunk) {
+            $statusesResponse = StatusesRepository::getStatusesStatic($idsChunk)->status_repository;
+            $statuses = collect($statusesResponse['orders'] ?? []);
+            $allStatuses = $allStatuses->merge($statuses);
+        }
+
+        foreach ($this->order_response['orders'] as $key => $order) {
+            $this->order_response['orders'][$key]['supplierStatus'] =
+                $allStatuses->firstWhere('id', $order['id'])['supplierStatus'] ?? null;
         }
     }
+
+    public function getAllOrders(int $dateFrom = null, int $dateTo = null): OrdersRepository
+    {
+        $allOrders = [];
+        $next = 0;
+
+        do {
+            $res = $this->getOrders(1000, $next, $dateFrom, $dateTo);
+            $orders = $res['orders'] ?? [];
+            $allOrders = array_merge($allOrders, $orders);
+
+            $next = $res['next'] ?? 0;
+        } while ($next);
+
+        $this->order_response['orders'] = $allOrders;
+        $this->order_response['next'] = 0;
+
+        return $this;
+    }
+
+
 
     private function getOrdersId(): array
     {
